@@ -39,7 +39,32 @@
 
 ## 구현
 > 핵심: 구분자 컬렉션을 데이터로 관리하고, 해당 컬렉션을 기반으로 동적으로 문자열을 split하는 parser structure
-[요구사항 1- split메서드 사용]
-1. split(",|:")
-   - `line.split(",|:");` : 쉼표 혹은 콜론을 구분자로 가지는 문자열 parsing 
-2. 
+
+[기능1 - 문자열을 다양한 구분자로 파싱한다.]
+
+[기능 2 - 구분자를 자료구조에서 관리한다.]
+- data strucuture
+```java
+private final Set<String> delimeter = new LinkedHashSet<>();
+```
+- delimeter 등록
+
+```java
+import com.sun.source.tree.PatternTree;
+
+public void addDelimeter(String delimeter) {    //regex-safe하게 등록 (Pattern.quote 사용)
+    set.add(Pattern.quote(delimeter));
+}
+```
+
+- regex 빌드
+```java
+private String buildRegex(){
+    if(delimeter.isEmpty()){
+        throw new IllegalArgumentException();
+    }
+    return String.join("|",delimeter);
+}
+```
+
+[기능 3- 새로운 구분자를 추가하거나 제거시 코드 수정 없이 동적으로 반영한다.]

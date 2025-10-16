@@ -9,6 +9,13 @@ public class Application {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String line = br.readLine();
 
-        line.split(".")
+        line.split(".");
+        int[] sum = new int[line.length()];
+        int result =0;
+
+        for (int i = 0; i < line.length(); i++) {
+            result += sum[i];
+        }
+        return result;
     }
 }
