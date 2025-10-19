@@ -19,6 +19,13 @@ import java.util.regex.Pattern;
 public class Application {
     
     public static void main(String[] args) throws IOException {
+        // 테스트 모드 확인
+        if (args.length > 0 && "test".equals(args[0])) {
+            CalculatorTest.runAllTests();
+            return;
+        }
+        
+        // 일반 실행 모드
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String input = br.readLine();
         
@@ -198,6 +205,87 @@ public class Application {
             validationStrategy.validate(input);
             int[] numbers = parserStrategy.parse(input);
             return calculationStrategy.calculate(numbers);
+        }
+    }
+    
+    /**
+     * 단위 테스트를 위한 테스트 메서드들
+     */
+    private static class CalculatorTest {
+        
+        public static void runAllTests() {
+            System.out.println("=== 계산기 단위 테스트 시작 ===");
+            
+            testEmptyString();
+            testBasicDelimiters();
+            testCustomDelimiter();
+            testInvalidInput();
+            testComplexCases();
+            
+            System.out.println("=== 모든 테스트 통과! ===");
+        }
+        
+        private static void testEmptyString() {
+            CalculatorService service = new CalculatorService();
+            int result = service.calculate("");
+            assert result == 0 : "빈 문자열은 0을 반환해야 함";
+            System.out.println("✓ 빈 문자열 테스트 통과");
+        }
+        
+        private static void testBasicDelimiters() {
+            CalculatorService service = new CalculatorService();
+            
+            int result1 = service.calculate("1,2");
+            assert result1 == 3 : "1,2는 3이어야 함";
+            
+            int result2 = service.calculate("1,2,3");
+            assert result2 == 6 : "1,2,3은 6이어야 함";
+            
+            int result3 = service.calculate("1,2:3");
+            assert result3 == 6 : "1,2:3은 6이어야 함";
+            
+            System.out.println("✓ 기본 구분자 테스트 통과");
+        }
+        
+        private static void testCustomDelimiter() {
+            CalculatorService service = new CalculatorService();
+            
+            int result = service.calculate("//;\n1;2;3");
+            assert result == 6 : "//;\n1;2;3은 6이어야 함";
+            
+            System.out.println("✓ 커스텀 구분자 테스트 통과");
+        }
+        
+        private static void testInvalidInput() {
+            CalculatorService service = new CalculatorService();
+            
+            try {
+                service.calculate("//\n1,2,3");
+                assert false : "빈 커스텀 구분자는 예외를 발생시켜야 함";
+            } catch (IllegalArgumentException e) {
+                System.out.println("✓ 잘못된 커스텀 구분자 예외 처리 테스트 통과");
+            }
+            
+            try {
+                service.calculate("//;\n1,2,3");
+                assert false : "잘못된 구분자 사용은 예외를 발생시켜야 함";
+            } catch (IllegalArgumentException e) {
+                System.out.println("✓ 잘못된 구분자 사용 예외 처리 테스트 통과");
+            }
+        }
+        
+        private static void testComplexCases() {
+            CalculatorService service = new CalculatorService();
+            
+            // 복합 구분자 테스트
+            int result1 = service.calculate("//|\n1|2|3");
+            assert result1 == 6 : "//|\n1|2|3은 6이어야 함";
+            
+            // 기본 구분자와 커스텀 구분자 혼합
+            int result2 = service.calculate("//@\n1@2,3:4");
+            assert result2 == 10 : "//@\n1@2,3:4는 10이어야 함";
+            
+            System.out.println("✓ 복합 케이스 테스트 통과");
         }
     }
 }
