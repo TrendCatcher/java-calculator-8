@@ -10,11 +10,44 @@ import java.util.regex.Pattern;
 
 /**
  * SOLID 원칙을 적용한 문자열 계산기
- * - SRP: 각 기능별 내부 클래스로 책임 분리
- * - OCP: 확장 가능한 구조 (새로운 구분자 타입 추가 가능)
- * - LSP: 인터페이스 구현체들이 서로 교체 가능
- * - ISP: 클라이언트별 인터페이스 분리
- * - DIP: 인터페이스 기반 의존성 주입
+ * 
+ * <h3>주요 기능</h3>
+ * <ul>
+ *   <li>기본 구분자(쉼표, 콜론)로 문자열 파싱</li>
+ *   <li>커스텀 구분자 지원 (//구분자\n숫자들 형태)</li>
+ *   <li>입력 검증 및 예외 처리</li>
+ *   <li>숫자 합계 계산</li>
+ * </ul>
+ * 
+ * <h3>SOLID 원칙 적용</h3>
+ * <ul>
+ *   <li><strong>SRP</strong>: 각 기능별 내부 클래스로 책임 분리</li>
+ *   <li><strong>OCP</strong>: 확장 가능한 구조 (새로운 구분자 타입 추가 가능)</li>
+ *   <li><strong>LSP</strong>: 인터페이스 구현체들이 서로 교체 가능</li>
+ *   <li><strong>ISP</strong>: 클라이언트별 인터페이스 분리</li>
+ *   <li><strong>DIP</strong>: 인터페이스 기반 의존성 주입</li>
+ * </ul>
+ * 
+ * <h3>사용법</h3>
+ * <pre>
+ * // 일반 실행
+ * java Application
+ * 
+ * // 테스트 실행
+ * java Application test
+ * </pre>
+ * 
+ * <h3>예제</h3>
+ * <pre>
+ * 입력: "1,2,3"     → 출력: 6
+ * 입력: "1,2:3"     → 출력: 6
+ * 입력: "//;\n1;2;3" → 출력: 6
+ * 입력: ""          → 출력: 0
+ * </pre>
+ * 
+ * @author SOLID Calculator Team
+ * @version 1.0
+ * @since 2024
  */
 public class Application {
     
