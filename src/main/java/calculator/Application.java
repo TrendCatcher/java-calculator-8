@@ -23,9 +23,7 @@ import java.util.regex.Pattern;
  * <ul>
  *   <li><strong>SRP</strong>: 각 기능별 내부 클래스로 책임 분리</li>
  *   <li><strong>OCP</strong>: 확장 가능한 구조 (새로운 구분자 타입 추가 가능)</li>
- *   <li><strong>LSP</strong>: 인터페이스 구현체들이 서로 교체 가능</li>
- *   <li><strong>ISP</strong>: 클라이언트별 인터페이스 분리</li>
- *   <li><strong>DIP</strong>: 인터페이스 기반 의존성 주입</li>
+ *   <li><strong>DIP</strong>: 의존성 주입을 통한 느슨한 결합</li>
  * </ul>
  * 
  * <h3>사용법</h3>
@@ -45,9 +43,6 @@ import java.util.regex.Pattern;
  * 입력: ""          → 출력: 0
  * </pre>
  * 
- * @author SOLID Calculator Team
- * @version 1.0
- * @since 2024
  */
 public class Application {
     
@@ -69,39 +64,9 @@ public class Application {
     }
     
     /**
-     * ISP 적용: 구분자 전략 인터페이스
+     * SRP 적용: 구분자 관리 전용 클래스
      */
-    private interface DelimiterStrategy {
-        Set<String> getDelimiters();
-        String getDelimiterRegex();
-        void addDelimiter(String delimiter);
-    }
-    
-    /**
-     * ISP 적용: 파싱 전략 인터페이스
-     */
-    private interface ParserStrategy {
-        int[] parse(String input);
-    }
-    
-    /**
-     * ISP 적용: 검증 전략 인터페이스
-     */
-    private interface ValidationStrategy {
-        void validate(String input);
-    }
-    
-    /**
-     * ISP 적용: 계산 전략 인터페이스
-     */
-    private interface CalculationStrategy {
-        int calculate(int[] numbers);
-    }
-    
-    /**
-     * SRP 적용: 구분자 관리 전용 클래스 (LSP 적용)
-     */
-    private static class DelimiterManager implements DelimiterStrategy {
+    private static class DelimiterManager {
         private final Set<String> delimiters = new LinkedHashSet<>();
         
         public DelimiterManager() {
@@ -110,33 +75,29 @@ public class Application {
             addDelimiter(":");
         }
         
-        @Override
         public void addDelimiter(String delimiter) {
             delimiters.add(Pattern.quote(delimiter));
         }
         
-        @Override
         public Set<String> getDelimiters() {
             return new LinkedHashSet<>(delimiters);
         }
         
-        @Override
         public String getDelimiterRegex() {
             return String.join("|", delimiters);
         }
     }
     
     /**
-     * SRP 적용: 문자열 파싱 전용 클래스 (LSP 적용)
+     * SRP 적용: 문자열 파싱 전용 클래스
      */
-    private static class StringParser implements ParserStrategy {
-        private final DelimiterStrategy delimiterStrategy;
+    private static class StringParser {
+        private final DelimiterManager delimiterManager;
         
-        public StringParser(DelimiterStrategy delimiterStrategy) {
-            this.delimiterStrategy = delimiterStrategy;
+        public StringParser(DelimiterManager delimiterManager) {
+            this.delimiterManager = delimiterManager;
         }
         
-        @Override
         public int[] parse(String input) {
             if (input == null || input.isEmpty()) {
                 return new int[]{0};
@@ -153,7 +114,7 @@ public class Application {
          * 기본 구분자로 문자열을 파싱하여 숫자 배열 반환
          */
         private int[] parseBasicDelimiters(String input) {
-            String[] parts = input.split(delimiterStrategy.getDelimiterRegex());
+            String[] parts = input.split(delimiterManager.getDelimiterRegex());
             return Arrays.stream(parts)
                     .filter(part -> !part.isEmpty())
                     .mapToInt(Integer::parseInt)
@@ -173,17 +134,16 @@ public class Application {
             String numbers = input.substring(delimiterEnd + 1);
             
             // 커스텀 구분자 추가
-            delimiterStrategy.addDelimiter(customDelimiter);
+            delimiterManager.addDelimiter(customDelimiter);
             
             return parseBasicDelimiters(numbers);
         }
     }
     
     /**
-     * SRP 적용: 입력 검증 전용 클래스 (LSP 적용)
+     * SRP 적용: 입력 검증 전용 클래스
      */
-    private static class InputValidator implements ValidationStrategy {
-        @Override
+    private static class InputValidator {
         public void validate(String input) {
             if (input == null) {
                 throw new IllegalArgumentException("Input cannot be null");
@@ -209,35 +169,34 @@ public class Application {
     }
     
     /**
-     * SRP 적용: 계산 전용 클래스 (LSP 적용)
+     * SRP 적용: 계산 전용 클래스
      */
-    private static class Calculator implements CalculationStrategy {
-        @Override
+    private static class Calculator {
         public int calculate(int[] numbers) {
             return Arrays.stream(numbers).sum();
         }
     }
     
     /**
-     * DIP 적용: 계산기 서비스 조합 클래스 (전략 패턴 적용)
+     * DIP 적용: 계산기 서비스 조합 클래스
      */
     private static class CalculatorService {
-        private final DelimiterStrategy delimiterStrategy;
-        private final ParserStrategy parserStrategy;
-        private final ValidationStrategy validationStrategy;
-        private final CalculationStrategy calculationStrategy;
+        private final DelimiterManager delimiterManager;
+        private final StringParser parser;
+        private final InputValidator validator;
+        private final Calculator calculator;
         
         public CalculatorService() {
-            this.delimiterStrategy = new DelimiterManager();
-            this.parserStrategy = new StringParser(delimiterStrategy);
-            this.validationStrategy = new InputValidator();
-            this.calculationStrategy = new Calculator();
+            this.delimiterManager = new DelimiterManager();
+            this.parser = new StringParser(delimiterManager);
+            this.validator = new InputValidator();
+            this.calculator = new Calculator();
         }
         
         public int calculate(String input) {
-            validationStrategy.validate(input);
-            int[] numbers = parserStrategy.parse(input);
-            return calculationStrategy.calculate(numbers);
+            validator.validate(input);
+            int[] numbers = parser.parse(input);
+            return calculator.calculate(numbers);
         }
     }
     
