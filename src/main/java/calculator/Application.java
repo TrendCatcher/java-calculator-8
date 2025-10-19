@@ -1,8 +1,6 @@
 package calculator;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import camp.nextstep.edu.missionutils.Console;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -46,7 +44,7 @@ import java.util.regex.Pattern;
  */
 public class Application {
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // 테스트 모드 확인
         if (args.length > 0 && "test".equals(args[0])) {
             CalculatorTest.runAllTests();
@@ -54,8 +52,7 @@ public class Application {
         }
         
         // 일반 실행 모드
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String input = br.readLine();
+        String input = Console.readLine();
         
         CalculatorService calculatorService = new CalculatorService();
         int result = calculatorService.calculate(input);
